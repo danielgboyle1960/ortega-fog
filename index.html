@@ -81,37 +81,29 @@ h1 {
     margin: 4px 0;
 }
 
-/* PURE SOLID CIRCLES */
+/* SOLID, CRISP STATUS CIRCLES */
 .dot {
     display: inline-block;
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    margin: 0 9px 0 4px;
+    margin: 0 9px 0 0;
     vertical-align: -2px;
-    background-image: none;
-    border: none;
-    outline: none;
-    box-shadow: none;
-    opacity: 1;
+    background-image: none !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
 }
 
-/* PURE BRIGHT RED */
 .fog-dot {
-    background-color: #ff0000;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-    opacity: 1;
+    background: #ff0000 !important;
 }
 
-/* PURE BRIGHT YELLOW */
 .partial-dot {
-    background-color: #ffff00;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-    opacity: 1;
+    background: #ffff00 !important;
 }
 
 .alert-dot {
@@ -119,14 +111,16 @@ h1 {
     width: 13px;
     height: 13px;
     border-radius: 50%;
-    background-color: #ff0000;
-    background-image: none;
+    background: #ff0000 !important;
+    background-image: none !important;
     margin-right: 7px;
     vertical-align: -1px;
-    border: none;
-    outline: none;
-    box-shadow: none;
-    opacity: 1;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
 }
 
 .alert-dot.pulse {
@@ -507,7 +501,6 @@ async function loadForecast() {
                     : "partial-dot";
 
                 row.innerHTML =
-                    '• '+
                     '<span class="dot '+
                     dotClass+
                     '"></span>'+

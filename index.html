@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ortega Fog</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #14213d;
+    color: white;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+    padding: 18px;
+}
+
+h1 {
+    text-align: center;
+    margin: 8px 0 4px;
+}
+
+.subtitle {
+    text-align: center;
+    opacity: 0.7;
+    margin-bottom: 22px;
+}
+
+.day {
+    margin-bottom: 22px;
+}
+
+.day-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.row {
+    padding: 11px 13px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    font-size: 16px;
+}
+
+.partial {
+    background: #ffd166;
+    color: #111;
+}
+
+.full {
+    background: #ef476f;
+    color: white;
+}
+
+.clear {
+    background: #35b779;
+    text-align: center;
+    padding: 22px;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    background: #4cc9f0;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>⛰️ Ortega Fog</h1>
+<div class="subtitle">SR-74 • 5 AM–8 AM • Next 7 Days</div>
+
+<div id="forecast">Checking forecast...</div>
+
+<button onclick="loadForecast()">↻ Update</button>
+
+</div>
+
+<script>
+
+const lat = 33.6122;
+const lon = -117.3620;
+
+function dewSpread(tempF, rh) {
+
+    rh = Math.max(0.1, Math.min(100, rh));
+
+    const tempC = (tempF - 32) * 5 / 9;
+    const A = 17.625;
+    const B = 243.04;
+
+    const alpha =
+        (A * tempC) / (B + tempC) +
+        Math.log(rh / 100);
+
+    const dewC =
+        (B * alpha) / (A - alpha);
+
+    const dewF =
+        dewC * 9 / 5 + 32;
+
+    return tempF - dewF;
+}
+
+
+function classify(temp, rh) {
+
+    const spread = dewSpread(temp, rh);
+
+    if (spread <= 2.0 && rh >= 95) {
+        return {
+            type: "full",
+            label: "🌫️ FOG",
+            spread
+        };
+    }
+
+    if (spread <= 4.5 && rh >= 83) {
+        return {
+            type: "partial",
+            label: "🟡 PARTIAL FOG",
+            spread
+        };
+    }
+
+    return null;
+}
+
+
+async function loadForecast() {
+
+    const output = document.getElementById("forecast");
+
+    output.innerHTML = "Checking forecast...";
+
+    const url =
+        "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + lat +
+        "&longitude=" + lon +
+        "&hourly=temperature_2m,relative_humidity_2m" +
+        "&temperature_unit=fahrenheit" +
+        "&timezone=America%2FLos_Angeles" +
+        "&forecast_days=7";
+
+    try {
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error("Weather service unavailable");
+        }
+
+        const data = await response.json();
+        const hourly = data.hourly;
+
+        const days = {};
+        let totalAlerts = 0;
+
+        for (let i = 0; i < hourly.time.length; i++) {
+
+            const time = new Date(hourly.time[i]);
+            const hour = time.getHours();
+
+            if (hour < 5 || hour > 8) {
+                continue;
+            }
+
+            const temp = hourly.temperature_2m[i];
+            const rh = hourly.relative_humidity_2m[i];
+
+            const condition = classify(temp, rh);
+
+            if (!condition) {
+                continue;
+            }
+
+            totalAlerts++;
+
+            const day = time.toLocaleDateString(
+                "en-US",
+                {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric"
+                }
+            );
+
+            if (!days[day]) {
+                days[day] = [];
+            }
+
+            days[day].push({
+                time,
+                temp,
+                rh,
+                condition
+            });
+        }
+
+
+        if (totalAlerts === 0) {
+
+            output.innerHTML =
+                `<div class="clear">
+                    🟢 NO FOG EXPECTED
+                </div>`;
+
+            return;
+        }
+
+
+        output.innerHTML = "";
+
+
+        for (const day in days) {
+
+            const section = document.createElement("div");
+            section.className = "day";
+
+            const title = document.createElement("div");
+            title.className = "day-title";
+            title.textContent = "📅 " + day;
+
+            section.appendChild(title);
+
+            for (const item of days[day]) {
+
+                const displayTime =
+                    item.time.toLocaleTimeString(
+                        "en-US",
+                        {
+                            hour: "numeric",
+                            minute: "2-digit"
+                        }
+                    );
+
+                const row = document.createElement("div");
+
+                row.className =
+                    "row " + item.condition.type;
+
+                row.textContent =
+                    `${displayTime} — ${item.condition.label} — ` +
+                    `${Math.round(item.temp)}°F — ` +
+                    `RH ${Math.round(item.rh)}% — ` +
+                    `Spread ${item.condition.spread.toFixed(1)}°F`;
+
+                section.appendChild(row);
+            }
+
+            output.appendChild(section);
+        }
+
+    }
+
+    catch (error) {
+
+        output.innerHTML =
+            `<div class="row full">
+                ⚠️ Could not retrieve forecast
+            </div>`;
+    }
+}
+
+
+loadForecast();
+
+</script>
+
+</body>
+</html>

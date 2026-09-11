@@ -11,8 +11,6 @@
     --text: #ffffff;
     --muted: #b9c6de;
     --cyan: #4cc9f0;
-    --red: #ff1744;
-    --yellow: #ffd400;
 }
 
 body {
@@ -83,6 +81,7 @@ h1 {
     margin: 4px 0;
 }
 
+/* PURE SOLID CIRCLES */
 .dot {
     display: inline-block;
     width: 16px;
@@ -90,16 +89,29 @@ h1 {
     border-radius: 50%;
     margin: 0 9px 0 4px;
     vertical-align: -2px;
+    background-image: none;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    opacity: 1;
 }
 
+/* PURE BRIGHT RED */
 .fog-dot {
-    background: var(--red);
-    box-shadow: 0 0 9px rgba(255,23,68,.95);
+    background-color: #ff0000;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    opacity: 1;
 }
 
+/* PURE BRIGHT YELLOW */
 .partial-dot {
-    background: var(--yellow);
-    box-shadow: 0 0 9px rgba(255,212,0,.95);
+    background-color: #ffff00;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    opacity: 1;
 }
 
 .alert-dot {
@@ -107,20 +119,18 @@ h1 {
     width: 13px;
     height: 13px;
     border-radius: 50%;
-    background: var(--red);
+    background-color: #ff0000;
+    background-image: none;
     margin-right: 7px;
     vertical-align: -1px;
-    box-shadow: 0 0 8px rgba(255,23,68,.95);
+    border: none;
+    outline: none;
+    box-shadow: none;
+    opacity: 1;
 }
 
 .alert-dot.pulse {
-    animation: pulse 1.2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.35); opacity: .55; }
-    100% { transform: scale(1); opacity: 1; }
+    animation: none;
 }
 
 .clear-message {
@@ -201,13 +211,9 @@ SR-74 Ortega Switchbacks • 5:00 AM–8:00 AM • Next 7 Days
 <div id="summary" class="summary"></div>
 <div id="updated" class="updated"></div>
 
-<div id="forecast">
-Checking forecast...
-</div>
+<div id="forecast">Checking forecast...</div>
 
-<button onclick="loadForecast()">
-↻ Update Forecast
-</button>
+<button onclick="loadForecast()">↻ Update Forecast</button>
 
 </div>
 
@@ -216,13 +222,11 @@ Checking forecast...
 const lat = 33.6122;
 const lon = -117.3620;
 
-
 function getDewPointSpread(tempF,rh) {
 
     rh = Math.max(0.1,Math.min(100,rh));
 
     const tempC = (tempF-32)*5/9;
-
     const A = 17.625;
     const B = 243.04;
 
@@ -239,17 +243,11 @@ function getDewPointSpread(tempF,rh) {
     return tempF-dewPointF;
 }
 
-
 function classify(temp,rh) {
 
-    const spread =
-        getDewPointSpread(temp,rh);
+    const spread = getDewPointSpread(temp,rh);
 
-    if (
-        spread <= 2.0 &&
-        rh >= 95
-    ) {
-
+    if (spread <= 2.0 && rh >= 95) {
         return {
             type:"fog",
             label:"FOG",
@@ -257,11 +255,7 @@ function classify(temp,rh) {
         };
     }
 
-    if (
-        spread <= 4.5 &&
-        rh >= 83
-    ) {
-
+    if (spread <= 4.5 && rh >= 83) {
         return {
             type:"partial",
             label:"PARTIAL FOG",
@@ -272,13 +266,9 @@ function classify(temp,rh) {
     return null;
 }
 
-
 function formatDay(dateString) {
 
-    const d =
-        new Date(
-            dateString+"T12:00:00"
-        );
+    const d = new Date(dateString+"T12:00:00");
 
     return d.toLocaleDateString(
         "en-US",
@@ -289,7 +279,6 @@ function formatDay(dateString) {
         }
     );
 }
-
 
 function formatHour(hour) {
 
@@ -303,24 +292,18 @@ function formatHour(hour) {
         suffix="PM";
 
     else if(hour>12) {
-
         displayHour=hour-12;
         suffix="PM";
     }
 
-    return displayHour+
-        ":00 "+
-        suffix;
+    return displayHour+":00 "+suffix;
 }
-
 
 function setUpdatedTime() {
 
     const now=new Date();
 
-    document
-    .getElementById("updated")
-    .textContent =
+    document.getElementById("updated").textContent =
         "Updated "+
         now.toLocaleTimeString(
             "en-US",
@@ -331,39 +314,30 @@ function setUpdatedTime() {
         );
 }
 
-
 function setSummary(events) {
 
     const summary =
-        document.getElementById(
-            "summary"
-        );
+        document.getElementById("summary");
 
     if(events.length===0) {
-
         summary.textContent =
             "No fog or partial fog expected";
-
         return;
     }
 
-
     const fogEvents =
         events.filter(
-            e =>
-            e.condition.type==="fog"
+            e => e.condition.type==="fog"
         );
-
 
     if(fogEvents.length>0) {
 
-        const firstFog =
-            fogEvents[0];
+        const firstFog=fogEvents[0];
 
         const sameDay =
             fogEvents.filter(
                 e =>
-                e.dateString ===
+                e.dateString===
                 firstFog.dateString
             );
 
@@ -372,35 +346,24 @@ function setSummary(events) {
             .map(e=>e.hour)
             .sort((a,b)=>a-b);
 
-
         const start =
             formatHour(hours[0])
             .replace(":00","");
 
         const end =
-            formatHour(
-                hours[hours.length-1]
-            )
+            formatHour(hours[hours.length-1])
             .replace(":00","");
 
-
         summary.innerHTML =
-            '<span class="alert-dot pulse"></span>'+
+            '<span class="alert-dot"></span>'+
             'Highest risk: '+
-            formatDay(
-                firstFog.dateString
-            )+
+            formatDay(firstFog.dateString)+
             ' '+
             start+
-            (
-                hours.length>1
-                ? '–'+end
-                : ''
-            );
+            (hours.length>1 ? '–'+end : '');
 
         return;
     }
-
 
     const first=events[0];
 
@@ -410,21 +373,16 @@ function setSummary(events) {
         'Partial fog possible: '+
         formatDay(first.dateString)+
         ' '+
-        formatHour(first.hour)
-        .replace(":00","");
+        formatHour(first.hour).replace(":00","");
 }
-
 
 async function loadForecast() {
 
     const output =
-        document.getElementById(
-            "forecast"
-        );
+        document.getElementById("forecast");
 
     output.innerHTML =
         "Checking forecast...";
-
 
     const url =
         "https://api.open-meteo.com/v1/gfs"+
@@ -435,7 +393,6 @@ async function loadForecast() {
         "&timezone=America%2FLos_Angeles"+
         "&forecast_days=7";
 
-
     try {
 
         const response =
@@ -444,23 +401,18 @@ async function loadForecast() {
                 {cache:"no-store"}
             );
 
-
         if(!response.ok)
             throw new Error(
                 "Weather service error"
             );
 
-
         const data =
             await response.json();
 
-        const forecast =
-            data.hourly;
-
+        const forecast=data.hourly;
 
         const days={};
         const allEvents=[];
-
 
         for(
             let i=0;
@@ -472,75 +424,48 @@ async function loadForecast() {
                 forecast.time[i];
 
             const dateString =
-                timeString.substring(
-                    0,10
-                );
+                timeString.substring(0,10);
 
             const hour =
                 Number(
-                    timeString.substring(
-                        11,13
-                    )
+                    timeString.substring(11,13)
                 );
 
-
-            if(
-                hour<5 ||
-                hour>8
-            )
+            if(hour<5 || hour>8)
                 continue;
 
-
             const temp =
-                forecast
-                .temperature_2m[i];
+                forecast.temperature_2m[i];
 
             const rh =
-                forecast
-                .relative_humidity_2m[i];
-
+                forecast.relative_humidity_2m[i];
 
             const condition =
                 classify(temp,rh);
 
-
-            /* Clear hours hidden */
-
             if(!condition)
                 continue;
 
-
             const event={
-
                 dateString:dateString,
                 hour:hour,
                 temp:temp,
                 rh:rh,
                 condition:condition
-
             };
 
-
             allEvents.push(event);
-
 
             if(!days[dateString])
                 days[dateString]=[];
 
-
-            days[dateString]
-                .push(event);
+            days[dateString].push(event);
         }
 
-
         setSummary(allEvents);
-
         setUpdatedTime();
 
-
-        if(
-            allEvents.length===0
-        ) {
+        if(allEvents.length===0) {
 
             output.innerHTML =
                 '<div class="clear-message">'+
@@ -550,130 +475,76 @@ async function loadForecast() {
             return;
         }
 
-
         output.innerHTML="";
 
-
-        for(
-            const dateString
-            in days
-        ) {
+        for(const dateString in days) {
 
             const section =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             section.className="day";
 
-
             const title =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
-            title.className =
-                "day-title";
+            title.className="day-title";
 
             title.textContent =
-                "📅 "+
-                formatDay(dateString);
+                "📅 "+formatDay(dateString);
 
+            section.appendChild(title);
 
-            section.appendChild(
-                title
-            );
-
-
-            for(
-                const item
-                of days[dateString]
-            ) {
+            for(const item of days[dateString]) {
 
                 const row =
-                    document.createElement(
-                        "div"
-                    );
+                    document.createElement("div");
 
                 row.className="row";
 
-
                 const dotClass =
-                    item.condition.type
-                    ==="fog"
+                    item.condition.type==="fog"
                     ? "fog-dot"
                     : "partial-dot";
 
-
                 row.innerHTML =
-
                     '• '+
                     '<span class="dot '+
                     dotClass+
                     '"></span>'+
-
                     '<b>'+
-                    formatHour(
-                        item.hour
-                    )+
+                    formatHour(item.hour)+
                     '</b>'+
-
                     ' — '+
                     item.condition.label+
-
                     ' — '+
-                    Math.round(
-                        item.temp
-                    )+
+                    Math.round(item.temp)+
                     '°F'+
-
                     ' — RH '+
-                    Math.round(
-                        item.rh
-                    )+
+                    Math.round(item.rh)+
                     '%'+
-
                     ' — Spread '+
-                    item.condition
-                    .spread
-                    .toFixed(1)+
+                    item.condition.spread.toFixed(1)+
                     '°F';
 
-
-                section.appendChild(
-                    row
-                );
+                section.appendChild(row);
             }
 
-
-            output.appendChild(
-                section
-            );
+            output.appendChild(section);
         }
 
-    }
+    } catch(error) {
 
-    catch(error) {
-
-        document
-        .getElementById("summary")
-        .textContent="";
-
-        document
-        .getElementById("updated")
-        .textContent="";
-
+        document.getElementById("summary").textContent="";
+        document.getElementById("updated").textContent="";
 
         output.innerHTML =
             '<div class="clear-message">'+
             '⚠️ Could not retrieve forecast'+
             '</div>';
 
-
         console.error(error);
     }
 }
-
 
 loadForecast();
 
